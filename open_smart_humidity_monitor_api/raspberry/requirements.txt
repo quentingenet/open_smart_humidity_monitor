@@ -1,0 +1,4 @@
+# DHT22 on Raspberry Pi (GPIO)
+adafruit-circuitpython-dht>=3.7.0
+adafruit-blinka>=8.0.0
+requests>=2.28.0
