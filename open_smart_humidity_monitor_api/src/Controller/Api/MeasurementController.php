@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller\Api;
 
 use App\Exception\ApiProblemException;
+use App\DTO\SubmitMeasurementRequest;
 use App\Repository\SensorRepository;
 use App\Service\MeasurementSubmissionService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -21,6 +22,7 @@ final class MeasurementController extends AbstractController
     public function __construct(
         private readonly SensorRepository $sensorRepository,
         private readonly MeasurementSubmissionService $measurementSubmissionService,
+        private readonly \Symfony\Component\Validator\Validator\ValidatorInterface $validator,
     ) {
     }
 
@@ -67,34 +69,40 @@ final class MeasurementController extends AbstractController
             );
         }
 
-        if (!\is_array($payload) || !array_key_exists('humidity', $payload)) {
+        if (!\is_array($payload)) {
             throw new ApiProblemException(
                 'https://example.com/problems/invalid-payload',
                 'Invalid payload',
-                'Body must contain "humidity" (number)',
+                'Body must be a JSON object',
                 Response::HTTP_BAD_REQUEST,
             );
         }
 
-        $humidity = $payload['humidity'];
-        if (!is_numeric($humidity)) {
+        $dto = new SubmitMeasurementRequest();
+        $dto->humidity = $payload['humidity'] ?? null;
+        $dto->measuredAt = isset($payload['measuredAt']) ? (string) $payload['measuredAt'] : null;
+
+        $violations = $this->validator->validate($dto);
+        if (\count($violations) > 0) {
+            $errors = [];
+
+            foreach ($violations as $violation) {
+                $errors[] = [
+                    'propertyPath' => $violation->getPropertyPath(),
+                    'message' => $violation->getMessage(),
+                ];
+            }
+
             throw new ApiProblemException(
-                'https://example.com/problems/invalid-humidity',
-                'Invalid humidity',
-                'humidity must be a number',
+                'https://example.com/problems/validation-error',
+                'Validation error',
+                'Request payload is not valid',
                 Response::HTTP_BAD_REQUEST,
+                ['violations' => $errors],
             );
         }
 
-        $humidityFloat = (float) $humidity;
-        if ($humidityFloat < 0.0 || $humidityFloat > 100.0) {
-            throw new ApiProblemException(
-                'https://example.com/problems/invalid-humidity-range',
-                'Invalid humidity range',
-                'humidity must be between 0 and 100',
-                Response::HTTP_BAD_REQUEST,
-            );
-        }
+        $humidityFloat = (float) $dto->humidity;
 
         $measuredAt = null;
         if (isset($payload['measuredAt']) && \is_string($payload['measuredAt'])) {

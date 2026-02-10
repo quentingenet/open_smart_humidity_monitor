@@ -20,6 +20,14 @@ class SensorRepository extends ServiceEntityRepository
 
     public function findOneByApiKey(string $apiKey): ?Sensor
     {
-        return $this->findOneBy(['apiKey' => $apiKey], limit: 1);
+        $sensors = $this->findBy(['isActive' => true]);
+
+        foreach ($sensors as $sensor) {
+            if (password_verify($apiKey, $sensor->getApiKey())) {
+                return $sensor;
+            }
+        }
+
+        return null;
     }
 }
