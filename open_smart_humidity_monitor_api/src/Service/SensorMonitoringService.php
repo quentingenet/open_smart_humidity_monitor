@@ -27,6 +27,7 @@ class SensorMonitoringService
             $latest?->getHumidity(),
             $average7Days,
             $isAlert,
+            (float) $sensor->getHumidityThreshold(),
         );
     }
 }

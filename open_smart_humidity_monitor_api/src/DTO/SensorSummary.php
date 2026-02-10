@@ -10,6 +10,7 @@ final readonly class SensorSummary implements \JsonSerializable
         public ?string $latestHumidity,
         public ?float $average7Days,
         public bool $isAlert,
+        public float $humidityThreshold,
     ) {
     }
 
@@ -19,6 +20,7 @@ final readonly class SensorSummary implements \JsonSerializable
             'latestHumidity' => $this->latestHumidity,
             'average7Days' => $this->average7Days,
             'isAlert' => $this->isAlert,
+            'humidityThreshold' => $this->humidityThreshold,
         ];
     }
 }
