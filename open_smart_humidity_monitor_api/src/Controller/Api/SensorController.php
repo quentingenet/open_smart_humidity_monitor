@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller\Api;
 
+use App\Exception\ApiProblemException;
 use App\Repository\SensorRepository;
 use App\Service\SensorMonitoringService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -25,7 +26,12 @@ final class SensorController extends AbstractController
     {
         $sensor = $this->sensorRepository->find($id);
         if ($sensor === null) {
-            return new JsonResponse(['error' => 'Sensor not found'], Response::HTTP_NOT_FOUND);
+            throw new ApiProblemException(
+                'https://example.com/problems/sensor-not-found',
+                'Sensor not found',
+                'Sensor not found',
+                Response::HTTP_NOT_FOUND,
+            );
         }
 
         $summary = $this->sensorMonitoringService->getSensorSummary($sensor);

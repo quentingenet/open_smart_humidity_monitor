@@ -11,6 +11,8 @@ const loading = ref(true)
 const error = ref<string | null>(null)
 const offline = ref(false)
 
+const demoMode = import.meta.env.VITE_DEMO_MODE === 'true'
+
 const demoData: SensorSummary = {
   latestHumidity: 62,
   average7Days: 58.5,
@@ -25,9 +27,12 @@ onMounted(async () => {
   try {
     data.value = await fetchSensorSummary(sensorId.value)
   } catch (e) {
-    offline.value = true
-    data.value = demoData
-    error.value = e instanceof Error ? e.message : 'API error'
+    if (demoMode) {
+      offline.value = true
+      data.value = demoData
+    } else {
+      error.value = e instanceof Error ? e.message : 'API error'
+    }
   } finally {
     loading.value = false
   }
@@ -45,7 +50,7 @@ onMounted(async () => {
     <v-container class="py-6">
       <v-progress-linear v-if="loading" indeterminate color="primary" class="mb-4 rounded-xl" />
       <v-alert
-        v-if="offline && data"
+        v-if="offline && data && demoMode"
         type="warning"
         density="compact"
         class="mb-4 rounded-xl"
@@ -100,7 +105,7 @@ onMounted(async () => {
 
         <v-row>
           <v-col cols="12">
-            <HumidityChart />
+            <HumidityChart :labels="['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']" :values="[52, 58, 55, 62, 59, 61, 58]" />
           </v-col>
         </v-row>
       </template>

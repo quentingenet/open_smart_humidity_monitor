@@ -13,16 +13,10 @@ import {
 } from 'chart.js'
 import type { ChartData, ChartOptions } from 'chart.js'
 
-const props = withDefaults(
-  defineProps<{
-    labels?: string[]
-    values?: number[]
-  }>(),
-  {
-    labels: () => [],
-    values: () => [],
-  }
-)
+const props = defineProps<{
+  labels?: string[]
+  values?: number[]
+}>()
 
 ChartJS.register(
   CategoryScale,
@@ -39,7 +33,6 @@ const canvasEl = ref<HTMLCanvasElement | null>(null)
 let chart: ChartJS | null = null
 
 const blue = 'rgba(25, 118, 210, 0.8)'
-const blueLight = 'rgba(25, 118, 210, 0.15)'
 const grey = 'rgba(120, 144, 156, 0.6)'
 const gridColor = 'rgba(120, 144, 156, 0.15)'
 
@@ -57,14 +50,17 @@ function initChart() {
 
   if (chart) chart.destroy()
 
-  const defaultLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-  const defaultValues = [52, 58, 55, 62, 59, 61, 58]
+  if (!props.labels?.length || !props.values?.length) {
+    chart = null
+    return
+  }
+
   const data: ChartData<'line'> = {
-    labels: props.labels.length ? props.labels : defaultLabels,
+    labels: props.labels,
     datasets: [
       {
         label: 'Humidity %',
-        data: props.values.length ? props.values : defaultValues,
+        data: props.values,
         borderColor: blue,
         backgroundColor: buildGradient(ctx),
         fill: true,
@@ -91,13 +87,13 @@ function initChart() {
     },
     scales: {
       x: {
-        grid: { color: gridColor, drawBorder: false },
+        grid: { color: gridColor },
         ticks: { color: grey, font: { size: 11 } },
       },
       y: {
         min: 0,
         max: 100,
-        grid: { color: gridColor, drawBorder: false },
+        grid: { color: gridColor },
         ticks: { color: grey, font: { size: 11 } },
       },
     },

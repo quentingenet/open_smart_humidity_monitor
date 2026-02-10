@@ -7,7 +7,7 @@ namespace App\DTO;
 final readonly class SensorSummary implements \JsonSerializable
 {
     public function __construct(
-        public ?string $latestHumidity,
+        public ?float $latestHumidity,
         public ?float $average7Days,
         public bool $isAlert,
         public float $humidityThreshold,

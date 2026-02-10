@@ -23,8 +23,10 @@ class SensorMonitoringService
         $isAlert = $latest !== null
             && (float) $latest->getHumidity() > (float) $sensor->getHumidityThreshold();
 
+        $latestHumidity = $latest !== null ? (float) $latest->getHumidity() : null;
+
         return new SensorSummary(
-            $latest?->getHumidity(),
+            $latestHumidity,
             $average7Days,
             $isAlert,
             (float) $sensor->getHumidityThreshold(),
